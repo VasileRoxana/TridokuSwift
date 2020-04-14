@@ -8,7 +8,7 @@
 
 import UIKit
 import SpriteKit
-import GameplayKit
+//import GameplayKit
 
 class GameViewController: UIViewController {
 
@@ -18,9 +18,10 @@ class GameViewController: UIViewController {
     
     
     @IBAction func pressedStartButton(_ sender: Any) {
-        let second = storyboard?.instantiateViewController(withIdentifier: "second") as! SecondViewController
-        present(second, animated: true, completion: nil)
-        
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let controller = storyBoard.instantiateViewController(withIdentifier: "second") as! SecondViewController
+        //present(second, animated: false, completion: nil)
+         self.navigationController?.pushViewController(controller, animated: true)
     }
     
 }

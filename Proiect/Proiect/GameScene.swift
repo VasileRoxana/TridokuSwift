@@ -8,83 +8,94 @@
 
 import SpriteKit
 import GameplayKit
+import CoreGraphics
 
 class GameScene: SKScene {
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
-    /*
+    var controller: SecondViewController!
+    let triangle = SKShapeNode()
+    //let triangle2 = SKShapeNode()
+    let triangle3 = SKShapeNode()
+    
+    var triangleNodes: [SKShapeNode] = Array(repeating: SKShapeNode(), count: 81)
+    
+    var yPath = CGFloat(40.0)
+    var yPos = CGFloat(600.0)
     override func didMove(to view: SKView) {
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
+        self.backgroundColor = UIColor.systemGray5
+        triangle.position = CGPoint(x: frame.midX, y: yPos)
+        
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: -20.0, y: yPath - 40.0))
+        path.addLine(to: CGPoint(x:20.0, y: yPath - 40.0))
+        path.addLine(to:CGPoint(x:0.0, y: yPath))
+        path.addLine(to:CGPoint(x:-20.0, y: yPath - 40.0))
+        
+        triangle.path = path.cgPath
+        triangle.fillColor = UIColor.yellow
+        triangle.strokeColor = UIColor.black
+        addChild(triangle)
+        
+     /*   let path2 = UIBezierPath()
+        path2.move(to: CGPoint(x: -20.0, y: 0.0))
+        path2.addLine(to: CGPoint(x:20.0, y:0.0))
+        path2.addLine(to:CGPoint(x:0.0, y: -1.0 * yPath))
+        path2.addLine(to:CGPoint(x:-20.0, y: 0.0))
+        
+        let path3 = UIBezierPath()
+        path3.move(to: CGPoint(x: -40.0, y: -40.0))
+        path3.addLine(to: CGPoint(x:0.0, y:-40.0))
+        path3.addLine(to:CGPoint(x:-20.0, y: yPath - 40))
+        path3.addLine(to:CGPoint(x:-40.0, y: -40.0))
+
+      */
+        for i in 0...7 {
+            createRow(_number: 3 + i * 2, _lastX: -20.0 * Double(i + 1))
+            yPos = yPos - 40;
         }
+        //text nodes
+        let node: SKLabelNode = SKLabelNode(fontNamed: "AmericanTypeWriter-Light")
+        node.text = "0"
+        node.fontSize = 20
+        node.fontColor = UIColor.black
+        node.horizontalAlignmentMode = .center
+        node.position.x = frame.midX
+        node.position.y = 605.0
         
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        addChild(node)
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
+    }
+    
+    
+    func createRow(_number: Int, _lastX: Double) { //_lastX NEGATIV -> coltul din stanga al triunghiului din mijloc de pe randul anterior
+        var lastX = _lastX
+    
+        for i in 0..._number - 1 { //lastX = -20 la al doilea rand
+            let path2 = UIBezierPath()
+            let triangle2 = SKShapeNode()
+            triangle2.position = CGPoint(x: frame.midX, y: yPos)
             
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
+            if(i % 2 == 0) {
+                path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 80.0))
+                path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 80.0))
+                path2.addLine(to:CGPoint(x: lastX, y: Double(yPath) - 40.0))
+                path2.addLine(to:CGPoint(x:(lastX - 20.0), y: Double(yPath) - 80.0))
+            }
+            else { //lastX este deja crescut cu 20
+                path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
+                path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 40.0))
+                path2.addLine(to:CGPoint(x: lastX, y: -1.0 * Double(yPath)))
+                path2.addLine(to:CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
+            }
+            triangle2.path = path2.cgPath
+            triangle2.fillColor = UIColor.yellow
+            triangle2.strokeColor = UIColor.black
+            triangleNodes[i] = triangle2
+            addChild(triangleNodes[i])
+            lastX = lastX + 20;
         }
     }
     
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-    }
- */
+ 
 }
