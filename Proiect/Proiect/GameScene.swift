@@ -14,16 +14,21 @@ class GameScene: SKScene {
     
     var controller: SecondViewController!
     let triangle = SKShapeNode()
-    
+    var nodeActive = -1;
     var triangleNodes: [SKShapeNode] = Array(repeating: SKShapeNode(), count: 81)
     var textNodes: [SKLabelNode] = Array(repeating: SKLabelNode(), count: 81)
     var buttons: [[SKLabelNode]] = Array(repeating: Array(repeating: SKLabelNode(), count: 3), count: 3)
+    
     let leftOuterLeg = [0, 1, 4, 9, 16, 25, 36, 49, 64]
     let rightOuterLeg = [0, 3, 8, 15, 24, 35, 48, 63, 80]
     let bottomOuterLeg = [64, 66, 68, 70, 72, 74, 76, 78, 80]
     let leftInnerLeg = [16, 26, 27, 39, 40, 54, 55, 71, 72]
     let rightInnerLeg = [24, 34, 33, 45, 44, 58, 57, 73, 72]
     let topInnerLeg = [16, 17, 18, 19, 20, 21, 22, 23, 24]
+    
+    let normalColor = UIColor(red: 0.6235, green: 0.9569, blue: 0.8784, alpha: 1.0)
+    let outerLegColor = UIColor(red: 0.2196, green: 0.8784, blue: 0.6235, alpha: 1.0) /* #38e09f */
+    let innerLegColor = UIColor(red: 0.4824, green: 0.949, blue: 0.6627, alpha: 1.0) /* #7bf2a9 */
     
     var yPath = CGFloat(40.0)
     var yPos = CGFloat(600.0)
@@ -102,7 +107,7 @@ class GameScene: SKScene {
             }
             
             triangle2.path = path2.cgPath
-            triangle2.fillColor = UIColor(red: 0.6235, green: 0.9569, blue: 0.8784, alpha: 1.0)
+            triangle2.fillColor = normalColor
             triangle2.strokeColor = UIColor.black
             
             triangleNodes[count] = triangle2
@@ -119,13 +124,13 @@ class GameScene: SKScene {
     func colorLegs(){
         
         for i in 0...8 {
-            triangleNodes[leftOuterLeg[i]].fillColor = UIColor(red: 0.2196, green: 0.8784, blue: 0.6235, alpha: 1.0) /* #38e09f */
-            triangleNodes[rightOuterLeg[i]].fillColor = UIColor(red: 0.2196, green: 0.8784, blue: 0.6235, alpha: 1.0) /* #38e09f */
-            triangleNodes[bottomOuterLeg[i]].fillColor = UIColor(red: 0.2196, green: 0.8784, blue: 0.6235, alpha: 1.0) /* #38e09f */
+            triangleNodes[leftOuterLeg[i]].fillColor = outerLegColor
+            triangleNodes[rightOuterLeg[i]].fillColor = outerLegColor
+            triangleNodes[bottomOuterLeg[i]].fillColor = outerLegColor
             
-            triangleNodes[leftInnerLeg[i]].fillColor = UIColor(red: 0.2549, green: 0.8588, blue: 0.698, alpha: 1.0) /* #41dbb2 */
-            triangleNodes[rightInnerLeg[i]].fillColor = UIColor(red: 0.2549, green: 0.8588, blue: 0.698, alpha: 1.0) /* #41dbb2 */
-            triangleNodes[topInnerLeg[i]].fillColor = UIColor(red: 0.2549, green: 0.8588, blue: 0.698, alpha: 1.0) /* #41dbb2 */
+            triangleNodes[leftInnerLeg[i]].fillColor = innerLegColor
+            triangleNodes[rightInnerLeg[i]].fillColor = innerLegColor
+            triangleNodes[topInnerLeg[i]].fillColor = innerLegColor
         }
         triangleNodes[16].fillColor = UIColor(red: 0.4824, green: 0.949, blue: 0.6627, alpha: 1.0) /* #7bf2a9 */
         triangleNodes[24].fillColor = UIColor(red: 0.4824, green: 0.949, blue: 0.6627, alpha: 1.0) /* #7bf2a9 */
@@ -160,9 +165,8 @@ class GameScene: SKScene {
         bigTriangle.path = bigPath.cgPath
         bigTriangle.strokeColor = UIColor.black
         bigTriangle.lineWidth = 2.5
+        
         addChild(bigTriangle)
-        
-        
     }
     
     func createButtons(){
@@ -180,5 +184,79 @@ class GameScene: SKScene {
                 self.addChild(buttons[j][k])
             }
         }
+        
+        let separators = SKShapeNode()
+        separators.position = CGPoint(x: frame.midX, y: yPos)
+        let path = UIBezierPath()
+        //left vertical line
+        path.move(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
+        path.addLine(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
+        //right vertical line
+        path.move(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
+        path.addLine(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
+        //top horizontal line
+        path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
+        path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
+        //bottom horizontal line
+        path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
+        path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
+        
+        separators.path = path.cgPath
+        separators.strokeColor = UIColor.lightGray
+        separators.lineWidth = 2.5
+        addChild(separators)
+    }
+    
+    func selectedNode(_i: Int) {
+        
+        if nodeActive != -1 {
+            nodeActive = _i
+            triangleNodes[_i].fillColor = UIColor.white
+        }
+        if nodeActive == _i {
+            nodeActive = -1
+            triangleNodes[_i].fillColor = UIColor.white
+        }
+        else {
+            nodeActive = _i
+            
+            if(topInnerLeg.contains(_i)){
+                triangleNodes[_i].fillColor = innerLegColor
+            }
+            else if(leftInnerLeg.contains(_i)){
+                triangleNodes[_i].fillColor = innerLegColor
+            }
+            else if(rightInnerLeg.contains(_i)){
+                triangleNodes[_i].fillColor = innerLegColor
+            }
+            else if(leftOuterLeg.contains(_i)){
+                triangleNodes[_i].fillColor = outerLegColor
+            }
+            else if(rightOuterLeg.contains(_i)){
+                triangleNodes[_i].fillColor = outerLegColor
+            }
+            else if(bottomOuterLeg.contains(_i)){
+                triangleNodes[_i].fillColor = outerLegColor
+            }
+            else {
+                triangleNodes[_i].fillColor = normalColor
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        for t in touches {
+            let touchedNodes = nodes(at: t.location(in: self))
+            // activate label
+            for i in 0...80 {
+              //  for j in 0...8 {
+                    if touchedNodes.contains(triangleNodes[i]) {
+                        selectedNode(_i: i)
+                    }
+              //  }
+            }
+        }
+        
     }
 }
