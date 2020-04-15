@@ -14,7 +14,9 @@ class GameScene: SKScene {
     
     var controller: SecondViewController!
     let triangle = SKShapeNode()
+    let delete = SKLabelNode()
     var nodeActive = -1;
+    var buttonActive = (-1, -1)
     var triangleNodes: [SKShapeNode] = Array(repeating: SKShapeNode(), count: 81)
     var textNodes: [SKLabelNode] = Array(repeating: SKLabelNode(), count: 81)
     var buttons: [[SKLabelNode]] = Array(repeating: Array(repeating: SKLabelNode(), count: 3), count: 3)
@@ -68,12 +70,32 @@ class GameScene: SKScene {
             yPos = yPos - 40;
         }
         
+        // background image
+        let texture = SKTexture(imageNamed: "background")
+        let background = SKSpriteNode(texture: texture)
+        background.position = CGPoint(x: frame.midX, y: frame.midY)
+        background.size.width = self.size.width
+        background.size.height = self.size.height
+        background.zPosition = -1.0
+        addChild(background)
         
         outlineTriangles()
         //color the inner and outer triangles legs
         colorLegs()
         //create the buttons
         createButtons()
+        
+        let deleteTexture = SKTexture(imageNamed: "delete")
+        let deleteButton = SKSpriteNode(texture: deleteTexture)
+        deleteButton.position.y = yPos - 138.0
+        deleteButton.position.x = frame.midX + 135.0
+        deleteButton.color = UIColor.darkGray
+        deleteButton.size.width = 40.0
+        deleteButton.size.height = 28.0
+    
+        addChild(deleteButton)
+        
+        
     }
     
     var count = 1;
@@ -86,10 +108,11 @@ class GameScene: SKScene {
             
             let node = SKLabelNode(fontNamed: "ArialMT")
        //     node.text = String(count)
-            node.fontSize = 15
+            node.fontSize = 20
             node.fontColor = UIColor.black
             node.horizontalAlignmentMode = .center
             node.position.x = frame.midX + CGFloat(lastX)
+           // node.text = String(count)
             
             if(i % 2 == 0) {
                 path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 80.0))
@@ -107,7 +130,8 @@ class GameScene: SKScene {
             }
             
             triangle2.path = path2.cgPath
-            triangle2.fillColor = normalColor
+           // triangle2.fillColor = normalColor
+            triangle2.fillColor = UIColor.clear
             triangle2.strokeColor = UIColor.black
             
             triangleNodes[count] = triangle2
@@ -124,13 +148,13 @@ class GameScene: SKScene {
     func colorLegs(){
         
         for i in 0...8 {
-            triangleNodes[leftOuterLeg[i]].fillColor = outerLegColor
-            triangleNodes[rightOuterLeg[i]].fillColor = outerLegColor
-            triangleNodes[bottomOuterLeg[i]].fillColor = outerLegColor
+            triangleNodes[leftOuterLeg[i]].fillColor = UIColor.clear
+            triangleNodes[rightOuterLeg[i]].fillColor = UIColor.clear
+            triangleNodes[bottomOuterLeg[i]].fillColor = UIColor.clear
             
-            triangleNodes[leftInnerLeg[i]].fillColor = innerLegColor
-            triangleNodes[rightInnerLeg[i]].fillColor = innerLegColor
-            triangleNodes[topInnerLeg[i]].fillColor = innerLegColor
+            triangleNodes[leftInnerLeg[i]].fillColor = UIColor.clear
+            triangleNodes[rightInnerLeg[i]].fillColor = UIColor.clear
+            triangleNodes[topInnerLeg[i]].fillColor = UIColor.clear
         }
         triangleNodes[16].fillColor = UIColor(red: 0.4824, green: 0.949, blue: 0.6627, alpha: 1.0) /* #7bf2a9 */
         triangleNodes[24].fillColor = UIColor(red: 0.4824, green: 0.949, blue: 0.6627, alpha: 1.0) /* #7bf2a9 */
@@ -178,7 +202,6 @@ class GameScene: SKScene {
                 button.position.x = frame.midX + CGFloat(80.0 * Double(k - 1))
                 button.fontColor = UIColor.darkGray
                 button.fontSize = 45
-                button.color = UIColor.red
                 button.text = String(j * 3 + k + 1)
                 buttons[j][k] = button
                 self.addChild(buttons[j][k])
@@ -202,25 +225,33 @@ class GameScene: SKScene {
         path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
         
         separators.path = path.cgPath
-        separators.strokeColor = UIColor.lightGray
+        separators.strokeColor = UIColor.clear
         separators.lineWidth = 2.5
         addChild(separators)
+        
+        
+        delete.position.y = yPos - 143.0
+        delete.position.x = frame.midX + 135.0
+        delete.fontSize = 25
+        delete.text = "del"
+        delete.fontColor = UIColor.clear
+        addChild(delete)
     }
     
     func selectedNode(_i: Int) {
         
         if nodeActive != -1 {
-            nodeActive = _i
-            triangleNodes[_i].fillColor = UIColor.white
+            let k = nodeActive
+            triangleNodes[k].fillColor = UIColor.clear
         }
         if nodeActive == _i {
             nodeActive = -1
-            triangleNodes[_i].fillColor = UIColor.white
+            triangleNodes[_i].fillColor = UIColor.clear
         }
         else {
             nodeActive = _i
-            
-            if(topInnerLeg.contains(_i)){
+            triangleNodes[_i].fillColor = UIColor.white
+         /*   if(topInnerLeg.contains(_i)){
                 triangleNodes[_i].fillColor = innerLegColor
             }
             else if(leftInnerLeg.contains(_i)){
@@ -241,21 +272,64 @@ class GameScene: SKScene {
             else {
                 triangleNodes[_i].fillColor = normalColor
             }
+ */
         }
     }
     
+    func buttonPressed(_j: Int, _k: Int) {
+        
+        if buttonActive != (-1, -1) {
+            let (a, b) = buttonActive
+            buttons[a][b].fontColor = UIColor.darkGray
+        }
+        if buttonActive == (_j, _k) {
+            buttonActive = (-1, -1)
+            buttons[_j][_k].fontColor = UIColor.darkGray
+        }
+        else {
+            buttonActive = (_j, _k)
+            buttons[_j][_k].fontColor = outerLegColor
+        }
+        
+        if nodeActive != -1 {
+            let x = nodeActive
+            let node = textNodes[x]
+            node.text = String(_j * 3 + _k + 1)
+        }
+        
+    }
+
+    func deleteValue() {
+        
+        if nodeActive != -1 {
+            let node = textNodes[nodeActive]
+            node.text = ""
+        }
+    }
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         for t in touches {
             let touchedNodes = nodes(at: t.location(in: self))
-            // activate label
+            
             for i in 0...80 {
-              //  for j in 0...8 {
-                    if touchedNodes.contains(triangleNodes[i]) {
-                        selectedNode(_i: i)
-                    }
-              //  }
+                if touchedNodes.contains(triangleNodes[i]) {
+                    selectedNode(_i: i)
+                }
             }
+            
+            for j in 0...2 {
+                for k in 0...2{
+                    if touchedNodes.contains(buttons[j][k]) {
+                        buttonPressed(_j: j, _k: k)
+                    }
+                }
+            }
+            
+            if touchedNodes.contains(delete) {
+                deleteValue()
+            }
+ 
         }
         
     }
