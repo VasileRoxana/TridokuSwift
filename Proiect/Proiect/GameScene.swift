@@ -12,6 +12,8 @@ import CoreGraphics
 
 class GameScene: SKScene {
     
+    let backButton = SKSpriteNode(imageNamed: "back")
+    let deleteButton = SKSpriteNode(imageNamed: "delete")
     var controller: SecondViewController!
     let triangle = SKShapeNode()
     let delete = SKLabelNode()
@@ -34,11 +36,11 @@ class GameScene: SKScene {
     
     var yPath = CGFloat(40.0)
     var yPos = CGFloat(600.0)
-    
+   
     override func didMove(to view: SKView) {
         
         self.backgroundColor = UIColor.systemGray5
-        
+    
         //first triangle node
         triangle.position = CGPoint(x: frame.midX, y: yPos)
         
@@ -81,12 +83,10 @@ class GameScene: SKScene {
         
         outlineTriangles()
         //color the inner and outer triangles legs
-        colorLegs()
+       // colorLegs()
         //create the buttons
         createButtons()
-        
-        let deleteTexture = SKTexture(imageNamed: "delete")
-        let deleteButton = SKSpriteNode(texture: deleteTexture)
+             
         deleteButton.position.y = yPos - 138.0
         deleteButton.position.x = frame.midX + 135.0
         deleteButton.color = UIColor.darkGray
@@ -95,9 +95,45 @@ class GameScene: SKScene {
     
         addChild(deleteButton)
         
+        backButton.position.y = yPos + 348.0
+        backButton.position.x = frame.midX - 140.0
+        backButton.color = UIColor.darkGray
+        backButton.size.width = 35.0
+        backButton.size.height = 30.0
+                
+        addChild(backButton)
+    }
+    func backAction(){
+        backButton.run(.fadeOut(withDuration: 1.0), completion: {
+            let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+            let controller = storyBoard.instantiateViewController(withIdentifier: "home") as! GameViewController
+            controller.view.frame = (self.view?.frame)!
+            controller.view.layoutIfNeeded()
+            
+            UIView.transition(from: self.view!, to: controller.view, duration: 0.3, options: .transitionFlipFromRight, completion: .none)
+        })
+    }
+  /*
+    func addBackButton() {
+        
+        backButton.setImage(UIImage(named: "back"), for: .normal)
+        backButton.setTitle("Back", for: .normal)
+        backButton.setTitleColor(backButton.tintColor, for: .normal)
+        backButton.addTarget(self, action: #selector(self.backAction(_:)), for: .touchUpInside)
+
         
     }
-    
+  
+    @IBAction func backAction(_ sender: UIButton) {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let controller = storyBoard.instantiateViewController(withIdentifier: "home") as! GameViewController
+        
+        controller.view.frame = (self.view?.frame)!
+        controller.view.layoutIfNeeded()
+        
+        UIView.transition(from: self.view!, to: controller.view, duration: 0.3, options: .transitionFlipFromRight, completion: .none)
+    }
+  */
     var count = 1;
     func createRow(_number: Int, _lastX: Double) { //_lastX NEGATIV -> coltul din stanga al triunghiului din mijloc de pe randul anterior
         var lastX = _lastX
@@ -144,7 +180,7 @@ class GameScene: SKScene {
         }
         
     }
-    
+/*
     func colorLegs(){
         
         for i in 0...8 {
@@ -162,7 +198,7 @@ class GameScene: SKScene {
         
         
     }
-    
+  */
     func outlineTriangles(){
         
         let bigTriangle = SKShapeNode()
@@ -229,13 +265,6 @@ class GameScene: SKScene {
         separators.lineWidth = 2.5
         addChild(separators)
         
-        
-        delete.position.y = yPos - 143.0
-        delete.position.x = frame.midX + 135.0
-        delete.fontSize = 25
-        delete.text = "del"
-        delete.fontColor = UIColor.clear
-        addChild(delete)
     }
     
     func selectedNode(_i: Int) {
@@ -251,28 +280,6 @@ class GameScene: SKScene {
         else {
             nodeActive = _i
             triangleNodes[_i].fillColor = UIColor.white
-         /*   if(topInnerLeg.contains(_i)){
-                triangleNodes[_i].fillColor = innerLegColor
-            }
-            else if(leftInnerLeg.contains(_i)){
-                triangleNodes[_i].fillColor = innerLegColor
-            }
-            else if(rightInnerLeg.contains(_i)){
-                triangleNodes[_i].fillColor = innerLegColor
-            }
-            else if(leftOuterLeg.contains(_i)){
-                triangleNodes[_i].fillColor = outerLegColor
-            }
-            else if(rightOuterLeg.contains(_i)){
-                triangleNodes[_i].fillColor = outerLegColor
-            }
-            else if(bottomOuterLeg.contains(_i)){
-                triangleNodes[_i].fillColor = outerLegColor
-            }
-            else {
-                triangleNodes[_i].fillColor = normalColor
-            }
- */
         }
     }
     
@@ -288,7 +295,8 @@ class GameScene: SKScene {
         }
         else {
             buttonActive = (_j, _k)
-            buttons[_j][_k].fontColor = outerLegColor
+         //   buttons[_j][_k].run(SKAction.scale(by: 0.5, duration: 0.5))
+        //    buttons[_j][_k].fontColor = outerLegColor
         }
         
         if nodeActive != -1 {
@@ -326,10 +334,13 @@ class GameScene: SKScene {
                 }
             }
             
-            if touchedNodes.contains(delete) {
+            if deleteButton.contains(t.location(in: self)) {
                 deleteValue()
             }
- 
+           
+            if backButton.contains(t.location(in: self)){
+                backAction()
+            }
         }
         
     }

@@ -10,7 +10,7 @@
         <!--Game View Controller-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="GameViewController" customModule="Proiect" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="home" id="BV1-FR-VrT" customClass="GameViewController" customModule="Proiect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" multipleTouchEnabled="YES" contentMode="scaleToFill" id="3se-qz-xqx" customClass="SKView">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -39,7 +39,7 @@
                                 <size key="shadowOffset" width="4" height="-1"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p6T-xL-FbV">
-                                <rect key="frame" x="112" y="410.5" width="151" height="60"/>
+                                <rect key="frame" x="112" y="410" width="151" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="Ddq-CT-Cfz"/>
                                 </constraints>
@@ -53,6 +53,7 @@
                                 </state>
                                 <connections>
                                     <action selector="pressedStartButton:" destination="BV1-FR-VrT" eventType="touchUpInside" id="hnN-g2-liR"/>
+                                    <segue destination="eib-iJ-ONg" kind="show" animates="NO" id="NCd-Db-YKS"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -73,7 +74,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1935.2" y="-367.46626686656674"/>
+            <point key="canvasLocation" x="1945" y="-367"/>
         </scene>
         <!--Second View Controller-->
         <scene sceneID="OXe-Ty-XeO">
@@ -89,7 +90,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="o8c-0R-HBM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2653.5999999999999" y="-368.36581709145429"/>
+            <point key="canvasLocation" x="2662" y="-367"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="FQl-Aj-Ik4">

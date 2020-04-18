@@ -19,6 +19,7 @@ class SecondViewController: UIViewController {
             scene.scaleMode =  .aspectFill
             scene.controller = self
             
+            
             view.presentScene(scene)
             
             view.ignoresSiblingOrder = true
@@ -26,11 +27,13 @@ class SecondViewController: UIViewController {
             view.showsFPS = true
             view.showsNodeCount = true
             view.showsPhysics = true
-        }
  
+        }
+        
+        
     }
     
-
+    
     /*
     // MARK: - Navigation
 

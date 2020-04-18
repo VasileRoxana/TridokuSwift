@@ -20,9 +20,9 @@ class GameViewController: UIViewController {
     @IBAction func pressedStartButton(_ sender: Any) {
         let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
         let controller = storyBoard.instantiateViewController(withIdentifier: "second") as! SecondViewController
-        //present(second, animated: false, completion: nil)
-         self.navigationController?.pushViewController(controller, animated: true)
+       // present(controller, animated: false, completion: nil)
+        self.navigationController?.pushViewController(controller, animated: true)
+        
     }
-    
 }
 
