@@ -36,7 +36,8 @@ class ActionsManager {
             UserDefaults.standard.synchronize()
         }
     }
-     
+    
+    //makes the transitions between scenes
     func transition(_ fromScene: SKScene, toScene: SceneType, transition: SKTransition? = nil ) {
         //check if we have a scene to transition to
         guard let scene = getScene(toScene) else { return }
@@ -51,6 +52,7 @@ class ActionsManager {
         }
     }
     
+    //gets the type of the actual scene
     func getScene(_ sceneType: SceneType) -> SKScene? {
         switch sceneType {
             case SceneType.MainMenu:
@@ -62,12 +64,20 @@ class ActionsManager {
     
     //function that saves the board when going back to main menu
     func rememberBoard(board: Board) {
-        
         lastBoard = board
-        
     }
     
-    
+    //generates an alert and presents it over the actual scene
+    func showAlert(on scene: SKScene, title: String, message: String, preferredStyle: UIAlertController.Style, actions: [UIAlertAction], animated: Bool, completion: ( () -> Swift.Void)? = nil) {
+        
+        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
+        
+        for action in actions {
+            alert.addAction(action)
+        }
+        
+        scene.view?.window?.rootViewController?.present(alert, animated: animated, completion: completion)
+    }
     
     
 }

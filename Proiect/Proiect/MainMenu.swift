@@ -21,40 +21,69 @@ class MainMenu: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
        for t in touches {
-         if t == touches.first {
+            if t == touches.first {
             
             enumerateChildNodes(withName: "//*") { (node, stop) in
                 if node.name == "easyButton" {
                     if node.contains(t.location(in: self)) {
-                        ActionsManager.shared.lastBoard = nil
-                        ActionsManager.shared.level = .easy
-                        ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
+                        
+                        if ActionsManager.shared.lastBoard != nil {
+                            self.showAlert(level: .easy)
+                        }
+                        else {
+                            self.newGame(level: .easy)
+                        }
                     }
                 }
                 else if node.name == "mediumButton" {
                     if node.contains(t.location(in: self)) {
-                        ActionsManager.shared.lastBoard = nil
-                        ActionsManager.shared.level = .medium
-                        ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
+                        
+                        if ActionsManager.shared.lastBoard != nil {
+                            self.showAlert(level: .medium)
+                        }
+                        else {
+                            self.newGame(level: .medium)
+                        }
                     }
                 }
                 else if node.name == "hardButton" {
                     if node.contains(t.location(in: self)) {
-                        ActionsManager.shared.lastBoard = nil
-                        ActionsManager.shared.level = .hard
-                        ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
+                        
+                        if ActionsManager.shared.lastBoard != nil {
+                            self.showAlert(level: .hard)
+                        }
+                        else {
+                            self.newGame(level: .hard)
+                        }
                     }
                 }
                 else if node.name == "resumeButton" {
                     if node.contains(t.location(in: self)) {
                         ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
+                        
+                        }
                     }
                 }
-                
             }
         }
     }
-}
+    
+    func showAlert(level: Level) {
+           
+           let yesAction = UIAlertAction(title: "Yes", style: .default, handler: {(result) in
+               self.newGame(level: level)})
+           let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+           
+           ActionsManager.shared.showAlert(on: self, title: "Start new game", message: "If you start a new game you'll lose the saved one. Proceed?", preferredStyle: .alert, actions: [yesAction, noAction], animated: true) {
+               print("Showed alert")
+           }
+       }
+    
+    func newGame(level: Level) {
+        ActionsManager.shared.lastBoard = nil
+        ActionsManager.shared.level = level
+        ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
+    }
     
     func addButtons() {
         

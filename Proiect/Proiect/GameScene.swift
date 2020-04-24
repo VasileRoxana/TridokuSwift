@@ -157,7 +157,6 @@ class GameScene: SKScene {
        }
     
     func restartGame() {
-
         
         for i in 0...80 {
             if board.canModify[i] {
@@ -167,14 +166,22 @@ class GameScene: SKScene {
             }
         }
         
-        triangleNodes[nodeActive].fillColor = UIColor.clear
+        if nodeActive != -1 {
+            triangleNodes[nodeActive].fillColor = UIColor.clear
+        }
         nodeActive = -1
-        
-        
     }
     
-   
-    
+    func showAlert() {
+        
+        let yesAction = UIAlertAction(title: "Yes", style: .default, handler: {(result) in
+            self.restartGame()})
+        let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+        
+        ActionsManager.shared.showAlert(on: self, title: "Restart game", message: "Are you sure you want to restart the game?", preferredStyle: .alert, actions: [yesAction, noAction], animated: true) {
+            print("Showed alert")
+        }
+    }
     func checkBoard() {
         
         if board.finishedGame() {
@@ -400,7 +407,8 @@ class GameScene: SKScene {
             }
             
             if restartButton.contains(t.location(in: self)) {
-                restartGame()
+                showAlert()
+             //   restartGame()
             }
         }
     }
