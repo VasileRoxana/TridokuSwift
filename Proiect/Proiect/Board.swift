@@ -57,64 +57,147 @@ class Board {
     
     convenience init(_ level: Level) {
         let boardGenerator = BoardGenerator()
-        self.init(board: boardGenerator.generateBoard(_level: (level)))
+        let board = boardGenerator.generateBoard(_level: (level))
+        self.init(board: board)
+        
+        for i in 0...80 {
+            if board[i] != 0 {
+                canModify[i] = false
+            }
+        }
+    }
+    
+    func getValue(pos: Int) -> Int {
+        return values[pos]
     }
    
-    func isMoveCorrect(pos: Int) -> State {
+    func isValueCorrect(number: Int, pos: Int) -> State {
         
+        if outerLegsOK(number: number, pos: pos) == false {
+            return .incorrect
+        }
+        
+        if innerLegsOK(number: number, pos: pos) == false {
+            return .incorrect
+        }
+        
+        if bigTriangleOK(number: number, pos: pos) == false {
+               return .incorrect
+        }
+        
+        if neighboursOK(number: number, pos: pos) == false {
+               return .incorrect
+        }
+        
+        return .correct
     }
    
     func parseBoard(board: [Int]) {
     
-        for i in board {
+        values = board
+    }
+    
+    func writeValue(number: Int, pos: Int) -> Bool {
+        
+        //check if the triangle can be modified
+        if !canModify[pos] {
+            return false
+        }
+        //check if the number is alteady written
+        else if values[pos] == number {
+            return false
+        }
+        //write the value in the values array and its correctness in the correct array for checking later
+        else {
+            let state = isValueCorrect(number: number, pos: pos)
+            correct[pos] = state
+            values[pos] = number
+            return true
+        }
+    }
+    
+    func finishedGame() -> Bool {
+        
+        if !values.contains(0) {
+            if !correct.contains(.incorrect) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////// / /
+    // FUNCTIONS THAT CHECK MOVES CORECTNESS //
+    ////////////////////////////////////////////////////////////////////////////////////// / /
+    
+    //check if the selected triangle is on one of the outer legs
+    //check the values on it if true
+    func outerLegsOK(number: Int, pos: Int) -> Bool {
+        var result = true
+        
+        if leftOuterLeg.contains(pos) && result == true {
             
+            for i in 0...8 {
+                if values[leftOuterLeg[i]] == number {
+                    result = false
+                    break
+                }
+            }
         }
+            
+        if rightOuterLeg.contains(pos) && result == true{
+
+            for i in 0...8 {
+                if values[rightOuterLeg[i]] == number {
+                    result = false
+                    break
+                }
+            }
+        }
+        
+        if bottomOuterLeg.contains(pos) && result == true {
+         
+            for i in 0...8 {
+                if values[bottomOuterLeg[i]] == number {
+                    result = false
+                    break
+                }
+            }
+        }
+        
+        return result
     }
     
-    // FUNCTIONS THAT CHECK MOVES CORECTNESS
-    func outerLegsOK(number: Int) -> Bool {
+    //check if the selected triangle is on one of the inner legs
+    //check the values on it if true
+    func innerLegsOK(number: Int, pos: Int) -> Bool {
         
-        for i in 0...8 {
-            if values[leftOuterLeg[i]] == number {
-                return false
+        if leftInnerLeg.contains(pos) {
+            
+            for i in 0...8 {
+                if values[leftInnerLeg[i]] == number {
+                    return false
+                }
             }
         }
         
-        for i in 0...8 {
-            if values[rightOuterLeg[i]] == number {
-                return false
+        if rightInnerLeg.contains(pos) {
+            
+            for i in 0...8 {
+                if values[rightInnerLeg[i]] == number {
+                    return false
+                }
             }
         }
         
-        for i in 0...8 {
-            if values[bottomOuterLeg[i]] == number {
-                return false
+        if topInnerLeg.contains(pos) {
+            
+            for i in 0...8 {
+                if values[topInnerLeg[i]] == number {
+                    return false
+                }
             }
         }
-        
-        return true
-    }
-    
-    func innerLegsOK(number: Int) -> Bool {
-        
-        for i in 0...8 {
-            if values[leftInnerLeg[i]] == number {
-                return false
-            }
-        }
-        
-        for i in 0...8 {
-            if values[rightInnerLeg[i]] == number {
-                return false
-            }
-        }
-        
-        for i in 0...8 {
-            if values[topInnerLeg[i]] == number {
-                return false
-            }
-        }
-        
         return true
     }
     
@@ -127,13 +210,13 @@ class Board {
         for i in 0...8 {
             if bigTriangles[i].contains(pos) {
                 triangleNumber = i
-                
+                break
             }
         }
         
        //check if the number already exists in the triangle
         for j in 0...8 {
-            if number == bigTriangles[triangleNumber][j] {
+            if number == values[bigTriangles[triangleNumber][j]] {
                 return false
             }
         }
@@ -164,7 +247,7 @@ class Board {
         else if pos >= 36 && pos <= 48 {
             return 6
         }
-        else if pos >= 49 && pos <= 50 {
+        else if pos >= 49 && pos <= 63 {
             return 7
         }
         else { //pos >= 64 && pos <= 80
@@ -172,7 +255,7 @@ class Board {
         }
     }
     
-    func neighboursOK(pos: Int, number: Int) -> Bool {
+    func neighboursOK(number: Int, pos: Int) -> Bool {
         
         let row = getRow(pos: pos)
         //get the number of elements on the row
@@ -394,9 +477,9 @@ class Board {
         
         if number == values[pos - 1] || number == values [pos - 2]
         || number == values [pos + 1] || number == values [pos + 2]
-        || number == values [pos + row + 1] || number == values [pos + row + 2] || number == values [pos + row]
-        || number == values [pos - row + 1] || number == values [pos - row] || number == values [pos - row - 1]
-        || number == values [pos - row + 2] || number == values [pos - row + 3] {
+        || number == values [pos + row - 1] || number == values [pos + row] || number == values [pos + row + 1]
+        || number == values [pos + row + 2] || number == values [pos + row + 3]
+        || number == values [pos - row + 1] || number == values [pos - row] || number == values [pos - row - 1]{
             return false
         }
         return true
