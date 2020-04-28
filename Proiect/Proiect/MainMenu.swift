@@ -16,6 +16,12 @@ class MainMenu: SKScene {
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         backgroundColor = UIColor.systemGray5
         
+        let logo = SKSpriteNode(imageNamed: "logo")
+        logo.position = CGPoint(x: 0.5, y: 250)
+        logo.zPosition = 2
+        logo.size.width = 270
+        logo.size.height = 130
+        addChild(logo)
         addButtons()
      }
     

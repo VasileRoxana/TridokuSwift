@@ -14,8 +14,8 @@ enum Level {
     case hard
 }
 
-class Board {
-    
+class Board/*: NSObject, NSCoding */{
+
     let leftOuterLeg = [0, 1, 4, 9, 16, 25, 36, 49, 64]
     let rightOuterLeg = [0, 3, 8, 15, 24, 35, 48, 63, 80]
     let bottomOuterLeg = [64, 66, 68, 70, 72, 74, 76, 78, 80]
@@ -41,20 +41,45 @@ class Board {
     var values: [Int]
     var correct: [State]
     var canModify: [Bool]
+    var userDefaults = UserDefaults.standard
     
     init() {
         values = Array(repeating: 0, count: 81)
         correct = Array(repeating: .notset, count: 81)
         canModify = Array(repeating: true, count: 81)
     }
-    
-    init(board: [Int]) {
-        values = Array(repeating: 0, count: 81)
-        correct = Array(repeating: .notset, count: 81)
-        canModify = Array(repeating: true, count: 81)
-        parseBoard(board: board)
+ /*
+    init(values: [Int], correct: [String], canModify: [Bool]) {
+        self.values = values
+        self.canModify = canModify
+  /*      for i in 0...80 {
+        if correct[i] == "correct" {
+            self.correct[i] = .correct
+            }
+        }
+ */
     }
     
+    
+    func encode(with coder: NSCoder) {
+        coder.encode(values, forKey: "values")
+        
+        for i in 0...80 {
+        if correct[i] == "correct" {
+            self.correct[i] = .correct
+            }
+        }
+        coder.encode(correct, forKey: "correct")
+        coder.encode(canModify, forKey: "canModify")
+    }
+    
+    required convenience init?(coder aDecoder: NSCoder) {
+        let values = aDecoder.decodeObject(forKey: "values") as! [Int]
+        let correct = aDecoder.decodeObject(forKey: "correct") as! [State]
+        let canModify = aDecoder.decodeObject(forKey: "canModify") as! [Bool]
+        self.init(values: values, correct: correct, canModify: canModify)
+    }
+    */
     convenience init(_ level: Level) {
         let boardGenerator = BoardGenerator()
         let board = boardGenerator.generateBoard(_level: (level))
@@ -67,25 +92,33 @@ class Board {
         }
     }
     
+    init(board: [Int]) {
+        values = Array(repeating: 0, count: 81)
+        correct = Array(repeating: .notset, count: 81)
+        canModify = Array(repeating: true, count: 81)
+       //super.init()
+        self.parseBoard(board: board)
+    }
+    
     func getValue(pos: Int) -> Int {
         return values[pos]
     }
    
     func isValueCorrect(number: Int, pos: Int) -> State {
         
-        if outerLegsOK(number: number, pos: pos) == false {
+        if outerLegsOK(values: self.values, number: number, pos: pos) == false {
             return .incorrect
         }
         
-        if innerLegsOK(number: number, pos: pos) == false {
+        if innerLegsOK(values: self.values, number: number, pos: pos) == false {
             return .incorrect
         }
         
-        if bigTriangleOK(number: number, pos: pos) == false {
+        if bigTriangleOK(values: self.values, number: number, pos: pos) == false {
                return .incorrect
         }
         
-        if neighboursOK(number: number, pos: pos) == false {
+        if neighboursOK(values: self.values, number: number, pos: pos) == false {
                return .incorrect
         }
         
@@ -132,7 +165,7 @@ class Board {
     
     //check if the selected triangle is on one of the outer legs
     //check the values on it if true
-    func outerLegsOK(number: Int, pos: Int) -> Bool {
+    func outerLegsOK(values: [Int], number: Int, pos: Int) -> Bool {
         var result = true
         
         if leftOuterLeg.contains(pos) && result == true {
@@ -170,7 +203,7 @@ class Board {
     
     //check if the selected triangle is on one of the inner legs
     //check the values on it if true
-    func innerLegsOK(number: Int, pos: Int) -> Bool {
+    func innerLegsOK(values: [Int], number: Int, pos: Int) -> Bool {
         
         if leftInnerLeg.contains(pos) {
             
@@ -201,7 +234,7 @@ class Board {
         return true
     }
     
-    func bigTriangleOK(number: Int, pos: Int) -> Bool {
+    func bigTriangleOK(values: [Int], number: Int, pos: Int) -> Bool {
         
         var triangleNumber: Int
         triangleNumber = 0
@@ -255,7 +288,7 @@ class Board {
         }
     }
     
-    func neighboursOK(number: Int, pos: Int) -> Bool {
+    func neighboursOK(values: [Int], number: Int, pos: Int) -> Bool {
         
         let row = getRow(pos: pos)
         //get the number of elements on the row
@@ -290,99 +323,99 @@ class Board {
             }
         case 2:
             if pos == 4 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 5 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 7 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 8 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 3:
             if pos == 9 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 10 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 14 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 15 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 4:
             if pos == 16 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 17 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 23 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 24 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 5:
             if pos == 25 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 26 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 34 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 35 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 6:
             if pos == 36 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 37 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 47 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 48 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 7:
             if pos == 49 {
-                result = checkFirstFromRow(pos: pos, row: rowElements, number: number)
+                result = checkFirstFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 50 {
-                result = checkSecondFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 62 {
-                result = checkSecondToLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkSecondToLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else if pos == 63 {
-                result = checkLastFromRow(pos: pos, row: rowElements, number: number)
+                result = checkLastFromRow(values: self.values, pos: pos, row: rowElements, number: number)
             }
             else {
-                result = checkAllNeighbours(pos: pos, row: rowElements, number: number)
+                result = checkAllNeighbours(values: self.values, pos: pos, row: rowElements, number: number)
             }
         case 8:
             if pos == 64 {
@@ -431,7 +464,7 @@ class Board {
         return result
     }
     
-    func checkFirstFromRow(pos: Int, row: Int, number: Int) -> Bool{
+    func checkFirstFromRow(values: [Int], pos: Int, row: Int, number: Int) -> Bool{
         
         if number == values[pos + row] || number == values [pos + row + 1]
             || number == values [pos + row + 2] || number == values [pos + row + 3]
@@ -442,7 +475,7 @@ class Board {
         return true
     }
     
-    func checkSecondFromRow(pos: Int, row: Int, number: Int) -> Bool{
+    func checkSecondFromRow(values: [Int], pos: Int, row: Int, number: Int) -> Bool{
         
         if number == values[pos + row] || number == values [pos + row + 1] || number == values [pos + row + 2]
             || number == values [pos + 1] || number == values [pos + 2] || number == values [pos - 1]
@@ -452,7 +485,7 @@ class Board {
         return true
     }
     
-    func checkLastFromRow(pos: Int, row: Int, number: Int) -> Bool{
+    func checkLastFromRow(values: [Int], pos: Int, row: Int, number: Int) -> Bool{
            
            if number == values[pos - 1] || number == values [pos - 2]
                || number == values [pos + row + 1] || number == values [pos + row + 2]
@@ -463,7 +496,7 @@ class Board {
            return true
        }
     
-    func checkSecondToLastFromRow(pos: Int, row: Int, number: Int) -> Bool{
+    func checkSecondToLastFromRow(values: [Int], pos: Int, row: Int, number: Int) -> Bool{
         
         if number == values[pos - 1] || number == values [pos - 2] || number == values [pos + 1]
             || number == values [pos + row + 1] || number == values [pos + row + 2] || number == values [pos + row]
@@ -473,7 +506,7 @@ class Board {
         return true
     }
     
-    func checkAllNeighbours (pos: Int, row: Int, number: Int) -> Bool{
+    func checkAllNeighbours (values: [Int], pos: Int, row: Int, number: Int) -> Bool{
         
         if number == values[pos - 1] || number == values [pos - 2]
         || number == values [pos + 1] || number == values [pos + 2]
@@ -483,6 +516,100 @@ class Board {
             return false
         }
         return true
+    }
+    
+    
+    ///////////////////////// auto-solve functions ////////////////////
+    
+    //check if we have a full array of values to obtain the solution
+    func isSolution(values: [Int]) -> Bool {
+        
+        for i in 0...80 {
+            if values[i] == 0 {
+                return false
+            }
+        }
+        return true
+    }
+    
+    //this function differs from isValueCorrect by including the values parameter and checking this array instead of the one from the actual board - so it will check the solution array that we will build
+    func correctValue(values: [Int], number: Int, pos: Int) -> State {
+        
+        if outerLegsOK(values: values, number: number, pos: pos) == false {
+            return .incorrect
+        }
+        
+        if innerLegsOK(values: values, number: number, pos: pos) == false {
+            return .incorrect
+        }
+        
+        if bigTriangleOK(values: values, number: number, pos: pos) == false {
+               return .incorrect
+        }
+        
+        if neighboursOK(values: values, number: number, pos: pos) == false {
+               return .incorrect
+        }
+        
+        return .correct
+    }
+    
+    //returns all the possible values that can be inserted into a triangle node
+    func possibleValues(values: [Int], pos: Int) -> [Int] {
+        var possibleValues = [Int]()
+        for i in 1...9 {
+            if correctValue(values: values, number: i, pos: pos) == .correct {
+                possibleValues.append(i)
+            }
+        }
+        
+        //return the possible values in a random order
+        for i in 0..<possibleValues.count{
+            for j in i + 1..<possibleValues.count  {
+                if(Int.random(in: 0...50) % 2 == 0) {
+                    let aux = possibleValues[i]
+                    possibleValues[i] = possibleValues[j]
+                    possibleValues[j] = aux
+                }
+            }
+        }
+        
+        return possibleValues
+    }
+    
+    //the function that builds the solving algorithm
+    func solvingAlgorithm(values: [Int]) -> [Int]? {
+        //check if we have a full array of values and it is a correct one
+        if isSolution(values: values) {
+            return values
+        }
+        else {
+            var tempValues = values
+            var pos = -1
+            for i in 0...80 {
+                if values[i] == 0 {
+                    pos = i
+                
+                //start inserting possible values until we meet a good solution
+                        for val in possibleValues(values: values, pos: pos) {
+                            tempValues[pos] = val
+                            let k = solvingAlgorithm(values: tempValues)
+                            if k != nil {
+                                //we have a full array of values that works for a solution
+                                return k
+                            }
+                            //the array of values we made it's not a solution so we'll change the value from the possible values array
+                            continue
+                            }
+                }
+            }
+            return nil
+        }
+    }
+    
+    //the function that calls the whole solving algorithm
+    func autoSolve() -> [Int]? {
+        return solvingAlgorithm(values: self.values)
     }
 }
     

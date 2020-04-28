@@ -11,7 +11,7 @@
 		07554014244B2C3B004EA214 /* BoardGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07554013244B2C3B004EA214 /* BoardGenerator.swift */; };
 		0755D3482451A8AF00164023 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0755D3472451A8AF00164023 /* MainMenu.swift */; };
 		0755D34A2451AF9600164023 /* ActionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0755D3492451AF9600164023 /* ActionsManager.swift */; };
-		0755D3502451C27600164023 /* Gameplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0755D34F2451C27600164023 /* Gameplay.swift */; };
+		0759871A2453621A002F96FE /* Proiect.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 075987182453621A002F96FE /* Proiect.xcdatamodeld */; };
 		0781349B243BA95B004734C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0781349A243BA95B004734C3 /* AppDelegate.swift */; };
 		078134A1243BA95C004734C3 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078134A0243BA95C004734C3 /* GameScene.swift */; };
 		078134A3243BA95C004734C3 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078134A2243BA95C004734C3 /* GameViewController.swift */; };
@@ -47,7 +47,7 @@
 		07554013244B2C3B004EA214 /* BoardGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardGenerator.swift; sourceTree = "<group>"; };
 		0755D3472451A8AF00164023 /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		0755D3492451AF9600164023 /* ActionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsManager.swift; sourceTree = "<group>"; };
-		0755D34F2451C27600164023 /* Gameplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gameplay.swift; sourceTree = SOURCE_ROOT; };
+		075987192453621A002F96FE /* Proiect.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Proiect.xcdatamodel; sourceTree = "<group>"; };
 		07813497243BA95B004734C3 /* Proiect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Proiect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0781349A243BA95B004734C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		078134A0243BA95C004734C3 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -115,7 +115,6 @@
 		07813499243BA95B004734C3 /* Proiect */ = {
 			isa = PBXGroup;
 			children = (
-				0755D34F2451C27600164023 /* Gameplay.swift */,
 				0781349A243BA95B004734C3 /* AppDelegate.swift */,
 				078134A0243BA95C004734C3 /* GameScene.swift */,
 				078134A2243BA95C004734C3 /* GameViewController.swift */,
@@ -129,6 +128,7 @@
 				078134AC243BA965004734C3 /* Info.plist */,
 				07A1D1AB243E0AD5003A3D65 /* GameView.swift */,
 				07554011244B28E4004EA214 /* Board.swift */,
+				075987182453621A002F96FE /* Proiect.xcdatamodeld */,
 				07554013244B2C3B004EA214 /* BoardGenerator.swift */,
 			);
 			path = Proiect;
@@ -287,8 +287,8 @@
 				078134A1243BA95C004734C3 /* GameScene.swift in Sources */,
 				078134A3243BA95C004734C3 /* GameViewController.swift in Sources */,
 				07554012244B28E4004EA214 /* Board.swift in Sources */,
-				0755D3502451C27600164023 /* Gameplay.swift in Sources */,
 				0755D3482451A8AF00164023 /* MainMenu.swift in Sources */,
+				0759871A2453621A002F96FE /* Proiect.xcdatamodeld in Sources */,
 				07A1D1AC243E0AD5003A3D65 /* GameView.swift in Sources */,
 				07554014244B2C3B004EA214 /* BoardGenerator.swift in Sources */,
 				07A1D1B6243E10E2003A3D65 /* SecondViewController.swift in Sources */,
@@ -618,6 +618,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		075987182453621A002F96FE /* Proiect.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				075987192453621A002F96FE /* Proiect.xcdatamodel */,
+			);
+			currentVersion = 075987192453621A002F96FE /* Proiect.xcdatamodel */;
+			path = Proiect.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 0781348F243BA95B004734C3 /* Project object */;
 }

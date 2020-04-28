@@ -7,64 +7,64 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0D7593EE-897B-46AA-8C62-343B679409AD"
+            uuid = "C4D5A1A1-3F20-4672-A731-9B956CFE4989"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Proiect/Board.swift"
+            filePath = "Proiect/GameScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "385"
-            endingLineNumber = "385"
-            landmarkName = "neighboursOK(number:pos:)"
+            startingLineNumber = "156"
+            endingLineNumber = "156"
+            landmarkName = "printBoard()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "35A0C0C4-ADF3-46BF-B02B-857CD67DD3DB"
+            uuid = "8FCDBCF0-8090-4E7A-B55D-F80FF4FDCC53"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Proiect/Board.swift"
+            filePath = "Proiect/GameScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "84"
-            endingLineNumber = "84"
-            landmarkName = "isValueCorrect(number:pos:)"
+            startingLineNumber = "148"
+            endingLineNumber = "148"
+            landmarkName = "printBoard()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "858CEA4F-8E6F-4F2D-9660-8E4ADB2AF530"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Proiect/Board.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "219"
-            endingLineNumber = "219"
-            landmarkName = "bigTriangleOK(number:pos:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "0A3A3EE5-1EAF-4C8A-AEB3-097E5EDF87FE"
+            uuid = "CF43FA2E-30C8-40F8-B423-A99EEB6C74B6"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
+            filePath = "Proiect/GameScene.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "127"
+            endingLineNumber = "127"
+            landmarkName = "checkBoard()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A90FA365-B63E-4041-81A8-D49763A0AE05"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
             filePath = "Proiect/Board.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "476"
-            endingLineNumber = "476"
-            landmarkName = "checkAllNeighbours(pos:row:number:)"
+            startingLineNumber = "595"
+            endingLineNumber = "595"
+            landmarkName = "solvingAlgorithm(values:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
