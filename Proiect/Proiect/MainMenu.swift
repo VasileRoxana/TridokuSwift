@@ -23,7 +23,7 @@ class MainMenu: SKScene {
         logo.size.height = 130
         addChild(logo)
         addButtons()
-     }
+    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
        for t in touches {
@@ -80,13 +80,14 @@ class MainMenu: SKScene {
                self.newGame(level: level)})
            let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
            
-           ActionsManager.shared.showAlert(on: self, title: "Start new game", message: "If you start a new game you'll lose the saved one. Proceed?", preferredStyle: .alert, actions: [yesAction, noAction], animated: true) {
-               print("Showed alert")
-           }
+           ActionsManager.shared.showAlert(on: self, title: "Start new game", message: "If you start a new game you'll lose the saved one. Proceed?", preferredStyle: .alert, actions: [yesAction, noAction], animated: true) {}
        }
     
     func newGame(level: Level) {
         ActionsManager.shared.lastBoard = nil
+        UserDefaults.standard.removeObject(forKey: "values")
+        UserDefaults.standard.removeObject(forKey: "correct")
+        UserDefaults.standard.removeObject(forKey: "canModify")
         ActionsManager.shared.level = level
         ActionsManager.shared.transition(self, toScene: .GameScene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
     }
@@ -122,6 +123,10 @@ class MainMenu: SKScene {
         
         if ActionsManager.shared.lastBoard != nil {
             print("resuming game")
+            resumeGameButton()
+        }
+        
+        if UserDefaults.standard.object(forKey: "values") != nil {
             resumeGameButton()
         }
     }

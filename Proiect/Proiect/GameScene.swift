@@ -11,10 +11,10 @@ import GameplayKit
 import CoreGraphics
 
 class GameScene: SKScene {
-
+    
     let backButton = SKSpriteNode(imageNamed: "back")
     let restartButton = SKSpriteNode(imageNamed: "restart")
-    var autoSolveButton = SKSpriteNode(imageNamed: "solve")
+    var hintButton = SKSpriteNode(imageNamed: "solve")
     var restartUIButton = UIButton()
     let deleteButton = SKSpriteNode(imageNamed: "delete")
     var controller: SecondViewController!
@@ -32,6 +32,7 @@ class GameScene: SKScene {
     
     var board: Board!
     var level: Level!
+    var count = 1;
     
     let leftOuterLeg = [0, 1, 4, 9, 16, 25, 36, 49, 64]
     let rightOuterLeg = [0, 3, 8, 15, 24, 35, 48, 63, 80]
@@ -56,27 +57,15 @@ class GameScene: SKScene {
         level = ActionsManager.shared.level
         
         switch level {
-               case .easy:
-                   hintCounter = 7
-               case .medium:
-                   hintCounter = 5
-               case .hard:
-                   hintCounter = 3
-               case .none:
-                   hintCounter = 0
+            case .easy:
+                hintCounter = 7
+            case .medium:
+                hintCounter = 5
+            case .hard:
+                hintCounter = 3
+            case .none:
+                hintCounter = 0
                }
-               
-     /*
-        if let savedBoard = userDefaults.data(forKey: "board"),
-            let dataBoard = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedBoard) as? NSObject {
-            
-            self.board = dataBoard as? Board
-            print(board.values)
-        }
-        else {
-            print("no saved board")
-        }
-       */
         createBoard()
         printBoard()
     }
@@ -109,7 +98,8 @@ class GameScene: SKScene {
         
         hintsLeft.text = "\(hintCounter) hints left"
         
-        //ActionsManager.shared.rememberBoard(board: board)
+        ActionsManager.shared.rememberBoard(board: board)
+        ActionsManager.shared.eraseGameFromMemory()
        }
        
        func showAlert() {
@@ -122,59 +112,50 @@ class GameScene: SKScene {
                print("Showed alert")
            }
        }
-       func checkBoard() {
-           
-           if board.finishedGame() {
-               gameStatus.text = "Congratulations! You finished the game"
-           }
-       }
     
-  func getDirectoryPath() -> URL {
-         let arrayPaths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-         return arrayPaths[0]
-     }
+    func checkBoard() {
+           
+        if board.finishedGame() {
+            gameStatus.text = "Congratulations! You finished the game"
+        }
+    }
+    
+    //check if we have a game saved in the local memory
+    func gameSaved() -> Bool {
+        
+        if userDefaults.object(forKey: "values") == nil
+            || userDefaults.object(forKey: "correct") == nil
+            || userDefaults.object(forKey: "canModify") == nil {
+            return false
+        }
+        return true
+    }
     
     func printBoard() {
-     /*
+     
+        if gameSaved() == true {
+            print("will try to retrieve board from memory")
+            do {
+                let encodedState = userDefaults.object(forKey: "correct") as! [String]
+                let encodedModify = userDefaults.object(forKey: "canModify") as! [Bool]
+                let encodedValues = userDefaults.object(forKey: "values") as! [Int]
+                print("retrieved board from memory..........")
+                
+                let savedBoard = Board(values: encodedValues, correct: encodedState, canModify: encodedModify)
+                self.board = savedBoard
+                ActionsManager.shared.lastBoard = board
+            }
+            ActionsManager.shared.eraseGameFromMemory()
+        }
+        
         if ActionsManager.shared.lastBoard != nil {
             board = ActionsManager.shared.lastBoard
         }
         else {
             board = Board(level)
-            let randomFilename = UUID().uuidString
-            let filePath = self.getDirectoryPath().appendingPathComponent(randomFilename)
-            
-                do {
-                    let boardData = try NSKeyedArchiver.archivedData(withRootObject: board!, requiringSecureCoding: true)
-                   // try boardData.write(to: filePath)
-                    userDefaults.set(boardData, forKey: "board")
-              //  let valuesData = try NSKeyedArchiver.archivedData(withRootObject: self.board.values, requiringSecureCoding: true)
-             //   userDefaults.set(valuesData, forKey: "values")
-                
-             //   userDefaults.set(board.values, forKey: "values")
-              
-            //    let correctData = try NSKeyedArchiver.archivedData(withRootObject: self.board.correct, requiringSecureCoding: true)
-            //    userDefaults.set(correctData, forKey: "correct")
-                
-            //     userDefaults.set(board.canModify, forKey: "canModify")
-             //   let canModifyData = try NSKeyedArchiver.archivedData(withRootObject: self.board.canModify, requiringSecureCoding: true)
-             //   userDefaults.set(canModifyData, forKey: "canModify")
-                print("archieved success......................")
-               // userDefaults.synchronize()
-            } catch {
-                print("Saving in memory error: \(error.localizedDescription)")
-            }
-        }*/
-        
-       if ActionsManager.shared.lastBoard != nil {
-            board = ActionsManager.shared.lastBoard
         }
-        else {
-            board = Board(level)
-        }
-        
-           for i in 0...80 {
-               let value = board.getValue(pos: i)
+            for i in 0...80 {
+                let value = board.getValue(pos: i)
                 if !board.canModify[i] {
                     textNodes[i].fontColor = UIColor.black
                     textNodes[i].fontName = "Arial-BoldMT"
@@ -184,7 +165,7 @@ class GameScene: SKScene {
                 }
                textNodes[i].text = (value == 0) ? "" : String(value)
            }
-
+        ActionsManager.shared.rememberBoard(board: board)
     }
     
     func hint() {
@@ -209,9 +190,7 @@ class GameScene: SKScene {
             }
             else {
                 let okAction = UIAlertAction(title: "ok :(", style: .cancel, handler: nil)
-                ActionsManager.shared.showAlert(on: self, title: "No hints left", message: "You used all your hints for this game", preferredStyle: .alert, actions: [okAction], animated: true) {
-                    print("Showed alert")
-                }
+                ActionsManager.shared.showAlert(on: self, title: "No hints left", message: "You used all your hints for this game", preferredStyle: .alert, actions: [okAction], animated: true) {}
             }
         }
     }
@@ -233,228 +212,8 @@ class GameScene: SKScene {
                }
            }
        }
-       
-    
-    func autoSolveGame() {
-        if let solution = board.solvingAlgorithm(values: self.board.values) {
-            self.board.values = solution
-            self.checkBoard()
-        }
-        else {
-            print("solving failed")
-        }
-    }
-    
-    var count = 1;
-    
-    func createBoard() {
-          
-          //first triangle node
-           triangle.position = CGPoint(x: frame.midX, y: yPos)
-           
-           let path = UIBezierPath()
-           path.move(to: CGPoint(x: -20.0, y: yPath - 40.0))
-           path.addLine(to: CGPoint(x:20.0, y: yPath - 40.0))
-           path.addLine(to:CGPoint(x:0.0, y: yPath))
-           path.addLine(to:CGPoint(x:-20.0, y: yPath - 40.0))
-           
-           triangle.path = path.cgPath
-           triangle.strokeColor = UIColor.black
-           triangleNodes[0] = triangle
-           addChild(triangle)
-           
-           //first text node
-           let node = SKLabelNode(fontNamed: "Arial-BoldMT")
-          // node.text = "0"
-           node.fontSize = 20
-           node.fontColor = UIColor.black
-           node.horizontalAlignmentMode = .center
-           node.position.x = frame.midX
-           node.position.y = yPos + 5.0
-           node.zPosition = 1
-           textNodes[0] = node
-           addChild(node)
-           
-           for i in 0...7 {
-               createRow(_number: 3 + i * 2, _lastX: -20.0 * Double(i + 1))
-               yPos = yPos - 40;
-           }
-           
-           // background image
-           let texture = SKTexture(imageNamed: "background")
-           let background = SKSpriteNode(texture: texture)
-           background.position = CGPoint(x: frame.midX, y: frame.midY)
-           background.size.width = self.size.width
-           background.size.height = self.size.height
-           background.zPosition = -1.0
-           addChild(background)
-           
-           outlineTriangles()
-           //create the buttons
-           createButtons()
-                
-           deleteButton.position.y = yPos - 138.0
-           deleteButton.position.x = frame.midX + 135.0
-           deleteButton.color = UIColor.darkGray
-           deleteButton.size.width = 40.0
-           deleteButton.size.height = 28.0
-           deleteButton.zPosition = 1
-           addChild(deleteButton)
-           
-           backButton.position.y = yPos + 348.0
-           backButton.position.x = frame.midX - 140.0
-           backButton.color = UIColor.darkGray
-           backButton.size.width = 35.0
-           backButton.size.height = 30.0
-           backButton.zPosition = 1
-           addChild(backButton)
-           
-           restartButton.position.y = yPos + 348.0
-           restartButton.position.x = frame.midX + 140.0
-           restartButton.color = UIColor.darkGray
-           restartButton.size.width = 35.0
-           restartButton.size.height = 30.0
-           restartButton.zPosition = 1
-           addChild(restartButton)
-           
-           gameStatus.position.y = yPos - 60.0
-           gameStatus.position.x = frame.midX
-           gameStatus.fontColor = UIColor.black
-           gameStatus.fontSize = 25
-           gameStatus.zPosition = 1
-           gameStatus.text = ""
-           addChild(gameStatus)
-           
-        autoSolveButton.position.y = yPos + 280.0
-        autoSolveButton.position.x = frame.midX + 140.0
-        autoSolveButton.size.width = 38.0
-        autoSolveButton.size.height = 35.0
-        autoSolveButton.zPosition = 1
-        addChild(autoSolveButton)
-        
-        hintsLeft.text = "\(hintCounter) hints left"
-        hintsLeft.fontSize = 10
-        hintsLeft.fontColor = .black
-        hintsLeft.position.y = yPos + 300.0
-        hintsLeft.position.x = frame.midX + 140.0
-        hintsLeft.zPosition = 1
-        addChild(hintsLeft)
-      }
-    
-    func createRow(_number: Int, _lastX: Double) { //_lastX NEGATIV -> coltul din stanga al triunghiului din mijloc de pe randul anterior
-        var lastX = _lastX
-        for i in 0..._number - 1 { //lastX = -20 la al doilea rand
-            let path2 = UIBezierPath()
-            let triangle2 = SKShapeNode()
-            triangle2.position = CGPoint(x: frame.midX, y: yPos)
-            
-            let node = SKLabelNode(fontNamed: "Arial-BoldMT")
-            node.fontSize = 20
-            node.fontColor = UIColor.darkGray
-            node.horizontalAlignmentMode = .center
-            node.position.x = frame.midX + CGFloat(lastX)
-            
-            if(i % 2 == 0) {
-                path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 80.0))
-                path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 80.0))
-                path2.addLine(to:CGPoint(x: lastX, y: Double(yPath) - 40.0))
-                path2.addLine(to:CGPoint(x:(lastX - 20.0), y: Double(yPath) - 80.0))
-                node.position.y = yPos - yPath + 10.0
-            }
-            else { //lastX este deja crescut cu 20
-                path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
-                path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 40.0))
-                path2.addLine(to:CGPoint(x: lastX, y: -1.0 * Double(yPath)))
-                path2.addLine(to:CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
-                node.position.y = yPos - yPath + 15.0
-            }
-            
-            triangle2.path = path2.cgPath
-            triangle2.fillColor = UIColor.clear
-            triangle2.strokeColor = UIColor.black
-            
-            triangleNodes[count] = triangle2
-            textNodes[count] = node
-            addChild(triangleNodes[count])
-            addChild(textNodes[count])
-            
-            count += 1
-            lastX = lastX + 20;
-        }
-        
-    }
-  
-    func outlineTriangles(){
-        
-        let bigTriangle = SKShapeNode()
-        bigTriangle.position = CGPoint(x: frame.midX, y: yPos)
-        let bigPath = UIBezierPath()
-        bigPath.move(to: CGPoint(x: -20.0 * 9, y: Double(yPath) - 40.0))
-        bigPath.addLine(to: CGPoint(x: 20.0 * 9, y: Double(yPath) - 40.0))
-        bigPath.addLine(to: CGPoint(x: 0.0, y: yPos + 80.0 ))
-        bigPath.addLine(to: CGPoint(x: -20.0 * 9, y: Double(yPath) - 40.0))
-        //linia mica stanga
-        bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: Double(yPath) - 40.0))
-        bigPath.addLine(to: CGPoint(x: -20.0 * 6 , y: yPos - 160.0))
-        //linia mare mijloc
-        bigPath.addLine(to: CGPoint(x: 20.0 * 6 , y: yPos - 160.0))
-        //linia mica dreapta
-        bigPath.addLine(to: CGPoint(x: 20.0 * 3, y: Double(yPath) - 40.0))
-        //linia mare stanga
-        bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: yPos - 40.0))
-        //linia mica mijloc
-        bigPath.addLine(to: CGPoint(x: 20.0 * 3, y: yPos - 40.0))
-        //linia mare dreapta
-         bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: Double(yPath) - 40.0))
-        
-        bigTriangle.path = bigPath.cgPath
-        bigTriangle.strokeColor = UIColor.black
-        bigTriangle.lineWidth = 2.5
-        
-        addChild(bigTriangle)
-    }
-    
-    func createButtons(){
-        
-        for j in 0...2 {
-            for k in 0...2{
-                let button = SKLabelNode(fontNamed: "ArialMT")
-                button.position.y = yPos - 200.0 - CGFloat(50.0 * Double(j - 1))
-                button.position.x = frame.midX + CGFloat(80.0 * Double(k - 1))
-                button.fontColor = UIColor.darkGray
-                button.fontSize = 45
-                button.text = String(j * 3 + k + 1)
-                buttons[j][k] = button
-                self.addChild(buttons[j][k])
-            }
-        }
-        
-        let separators = SKShapeNode()
-        separators.position = CGPoint(x: frame.midX, y: yPos)
-        let path = UIBezierPath()
-        //left vertical line
-        path.move(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
-        path.addLine(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
-        //right vertical line
-        path.move(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
-        path.addLine(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
-        //top horizontal line
-        path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
-        path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
-        //bottom horizontal line
-        path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
-        path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
-        
-        separators.path = path.cgPath
-        separators.strokeColor = UIColor.clear
-        separators.lineWidth = 2.5
-        addChild(separators)
-        
-    }
     
     func selectedNode(_i: Int) {
-        
-        
         
         if nodeActive != -1 {
             let k = nodeActive
@@ -472,6 +231,7 @@ class GameScene: SKScene {
                 highlightBoard(value: textNodes[nodeActive].text!)
             }
         }
+        ActionsManager.shared.rememberBoard(board: board)
     }
     
     func buttonPressed(_j: Int, _k: Int) {
@@ -497,18 +257,13 @@ class GameScene: SKScene {
                 } else {
                     node.fontColor = UIColor.darkGray
                 }
-                
-            //highlightBoard(value: number)
             }
         }
-        //update the board from local memory
-        //userDefaults.removeObject(forKey: "board")
-        //userDefaults.set(board, forKey: "board")
-        //ActionsManager.shared.rememberBoard(board: board)
+        board.transformStringState()
+        ActionsManager.shared.rememberBoard(board: board)
     }
 
     func deleteValue() {
-        
        
         if nodeActive != -1 {
             let node = textNodes[nodeActive]
@@ -516,7 +271,7 @@ class GameScene: SKScene {
         }
         undoHighlightBoard()
         //update the board from local memory
-        //ActionsManager.shared.rememberBoard(board: board)
+        ActionsManager.shared.rememberBoard(board: board)
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -551,10 +306,212 @@ class GameScene: SKScene {
                 showAlert()
             }
             
-            if autoSolveButton.contains(t.location(in: self)) {
-                //autoSolveGame()
+            if hintButton.contains(t.location(in: self)) {
                 hint()
             }
         }
     }
+    
+    func createBoard() {
+             
+        //first triangle node
+        triangle.position = CGPoint(x: frame.midX, y: yPos)
+              
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: -20.0, y: yPath - 40.0))
+        path.addLine(to: CGPoint(x:20.0, y: yPath - 40.0))
+        path.addLine(to:CGPoint(x:0.0, y: yPath))
+        path.addLine(to:CGPoint(x:-20.0, y: yPath - 40.0))
+              
+        triangle.path = path.cgPath
+        triangle.strokeColor = UIColor.black
+        triangleNodes[0] = triangle
+        addChild(triangle)
+              
+        //first text node
+        let node = SKLabelNode(fontNamed: "Arial-BoldMT")
+        node.fontSize = 20
+        node.fontColor = UIColor.black
+        node.horizontalAlignmentMode = .center
+        node.position.x = frame.midX
+        node.position.y = yPos + 5.0
+        node.zPosition = 1
+        textNodes[0] = node
+        addChild(node)
+              
+        for i in 0...7 {
+            createRow(_number: 3 + i * 2, _lastX: -20.0 * Double(i + 1))
+            yPos = yPos - 40;
+        }
+              
+        // background image
+        let texture = SKTexture(imageNamed: "background")
+        let background = SKSpriteNode(texture: texture)
+        background.position = CGPoint(x: frame.midX, y: frame.midY)
+        background.size.width = self.size.width
+        background.size.height = self.size.height
+        background.zPosition = -1.0
+        addChild(background)
+              
+        outlineTriangles()
+        //create the buttons
+        createButtons()
+            
+        deleteButton.position.y = yPos - 138.0
+        deleteButton.position.x = frame.midX + 135.0
+        deleteButton.color = UIColor.darkGray
+        deleteButton.size.width = 40.0
+        deleteButton.size.height = 28.0
+        deleteButton.zPosition = 1
+        addChild(deleteButton)
+              
+        backButton.position.y = yPos + 348.0
+        backButton.position.x = frame.midX - 140.0
+        backButton.color = UIColor.darkGray
+        backButton.size.width = 35.0
+        backButton.size.height = 30.0
+        backButton.zPosition = 1
+        addChild(backButton)
+            
+        restartButton.position.y = yPos + 348.0
+        restartButton.position.x = frame.midX + 140.0
+        restartButton.color = UIColor.darkGray
+        restartButton.size.width = 35.0
+        restartButton.size.height = 30.0
+        restartButton.zPosition = 1
+        addChild(restartButton)
+              
+        gameStatus.position.y = yPos - 60.0
+        gameStatus.position.x = frame.midX
+        gameStatus.fontColor = UIColor.black
+        gameStatus.fontSize = 25
+        gameStatus.zPosition = 1
+        gameStatus.text = ""
+        addChild(gameStatus)
+              
+        hintButton.position.y = yPos + 280.0
+        hintButton.position.x = frame.midX + 140.0
+        hintButton.size.width = 38.0
+        hintButton.size.height = 35.0
+        hintButton.zPosition = 1
+        addChild(hintButton)
+        
+        hintsLeft.text = "\(hintCounter) hints left"
+        hintsLeft.fontSize = 10
+        hintsLeft.fontColor = .black
+        hintsLeft.position.y = yPos + 300.0
+        hintsLeft.position.x = frame.midX + 140.0
+        hintsLeft.zPosition = 1
+        addChild(hintsLeft)
+        }
+       
+       func createRow(_number: Int, _lastX: Double) { //_lastX NEGATIV -> coltul din stanga al triunghiului din mijloc de pe randul anterior
+           var lastX = _lastX
+           for i in 0..._number - 1 { //lastX = -20 la al doilea rand
+               let path2 = UIBezierPath()
+               let triangle2 = SKShapeNode()
+               triangle2.position = CGPoint(x: frame.midX, y: yPos)
+               
+               let node = SKLabelNode(fontNamed: "Arial-BoldMT")
+               node.fontSize = 20
+               node.fontColor = UIColor.darkGray
+               node.horizontalAlignmentMode = .center
+               node.position.x = frame.midX + CGFloat(lastX)
+               
+               if(i % 2 == 0) {
+                   path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 80.0))
+                   path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 80.0))
+                   path2.addLine(to:CGPoint(x: lastX, y: Double(yPath) - 40.0))
+                   path2.addLine(to:CGPoint(x:(lastX - 20.0), y: Double(yPath) - 80.0))
+                   node.position.y = yPos - yPath + 10.0
+               }
+               else { //lastX este deja crescut cu 20
+                   path2.move(to: CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
+                   path2.addLine(to: CGPoint(x: (lastX + 20.0), y: Double(yPath) - 40.0))
+                   path2.addLine(to:CGPoint(x: lastX, y: -1.0 * Double(yPath)))
+                   path2.addLine(to:CGPoint(x: (lastX - 20.0), y: Double(yPath) - 40.0))
+                   node.position.y = yPos - yPath + 15.0
+               }
+               
+               triangle2.path = path2.cgPath
+               triangle2.fillColor = UIColor.clear
+               triangle2.strokeColor = UIColor.black
+               
+               triangleNodes[count] = triangle2
+               textNodes[count] = node
+               addChild(triangleNodes[count])
+               addChild(textNodes[count])
+               
+               count += 1
+               lastX = lastX + 20;
+           }
+       }
+     
+       func outlineTriangles(){
+           
+            let bigTriangle = SKShapeNode()
+            bigTriangle.position = CGPoint(x: frame.midX, y: yPos)
+            let bigPath = UIBezierPath()
+            bigPath.move(to: CGPoint(x: -20.0 * 9, y: Double(yPath) - 40.0))
+            bigPath.addLine(to: CGPoint(x: 20.0 * 9, y: Double(yPath) - 40.0))
+            bigPath.addLine(to: CGPoint(x: 0.0, y: yPos + 80.0 ))
+            bigPath.addLine(to: CGPoint(x: -20.0 * 9, y: Double(yPath) - 40.0))
+           //linia mica stanga
+                bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: Double(yPath) - 40.0))
+            bigPath.addLine(to: CGPoint(x: -20.0 * 6 , y: yPos - 160.0))
+           //linia mare mijloc
+            bigPath.addLine(to: CGPoint(x: 20.0 * 6 , y: yPos - 160.0))
+           //linia mica dreapta
+            bigPath.addLine(to: CGPoint(x: 20.0 * 3, y: Double(yPath) - 40.0))
+           //linia mare stanga
+            bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: yPos - 40.0))
+           //linia mica mijloc
+            bigPath.addLine(to: CGPoint(x: 20.0 * 3, y: yPos - 40.0))
+           //linia mare dreapta
+            bigPath.addLine(to: CGPoint(x: -20.0 * 3, y: Double(yPath) - 40.0))
+           
+            bigTriangle.path = bigPath.cgPath
+            bigTriangle.strokeColor = UIColor.black
+            bigTriangle.lineWidth = 2.5
+           
+            addChild(bigTriangle)
+       }
+       
+       func createButtons(){
+           
+           for j in 0...2 {
+               for k in 0...2{
+                   let button = SKLabelNode(fontNamed: "ArialMT")
+                   button.position.y = yPos - 200.0 - CGFloat(50.0 * Double(j - 1))
+                   button.position.x = frame.midX + CGFloat(80.0 * Double(k - 1))
+                   button.fontColor = UIColor.darkGray
+                   button.fontSize = 45
+                   button.text = String(j * 3 + k + 1)
+                   buttons[j][k] = button
+                   self.addChild(buttons[j][k])
+               }
+           }
+           
+           let separators = SKShapeNode()
+           separators.position = CGPoint(x: frame.midX, y: yPos)
+           let path = UIBezierPath()
+           //left vertical line
+           path.move(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
+           path.addLine(to: CGPoint(x: -20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
+           //right vertical line
+           path.move(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 1.8 * 80.0))
+           path.addLine(to: CGPoint(x: 20.0 * 2, y: Double(yPath) - 3.8 * 80.0))
+           //top horizontal line
+           path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
+           path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 2.5 * 80.0))
+           //bottom horizontal line
+           path.move(to: CGPoint(x: -20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
+           path.addLine(to: CGPoint(x: 20.0 * 5.0, y: Double(yPath) - 3.1 * 80.0))
+           
+           separators.path = path.cgPath
+           separators.strokeColor = UIColor.clear
+           separators.lineWidth = 2.5
+           addChild(separators)
+       }
 }
+

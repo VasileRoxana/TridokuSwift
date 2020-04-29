@@ -52,6 +52,12 @@ class ActionsManager {
         }
     }
     
+    func eraseGameFromMemory() {
+        UserDefaults.standard.removeObject(forKey: "values")
+        UserDefaults.standard.removeObject(forKey: "correct")
+        UserDefaults.standard.removeObject(forKey: "canModify")
+    }
+    
     //gets the type of the actual scene
     func getScene(_ sceneType: SceneType) -> SKScene? {
         switch sceneType {
@@ -78,6 +84,4 @@ class ActionsManager {
         
         scene.view?.window?.rootViewController?.present(alert, animated: animated, completion: completion)
     }
-    
-    
 }

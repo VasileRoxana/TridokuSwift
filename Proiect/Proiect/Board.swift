@@ -14,7 +14,7 @@ enum Level {
     case hard
 }
 
-class Board/*: NSObject, NSCoding */{
+class Board: NSObject, NSCoding {
 
     let leftOuterLeg = [0, 1, 4, 9, 16, 25, 36, 49, 64]
     let rightOuterLeg = [0, 3, 8, 15, 24, 35, 48, 63, 80]
@@ -41,45 +41,83 @@ class Board/*: NSObject, NSCoding */{
     var values: [Int]
     var correct: [State]
     var canModify: [Bool]
+    var stringState: [String]
     var userDefaults = UserDefaults.standard
     
-    init() {
+    override init() {
         values = Array(repeating: 0, count: 81)
         correct = Array(repeating: .notset, count: 81)
         canModify = Array(repeating: true, count: 81)
+        stringState = Array(repeating: "notset", count: 81)
+        
+        for i in 0...80 {
+            if correct[i] == .correct {
+                stringState[i] = "correct"
+            } else if correct[i] == .incorrect {
+                stringState[i] = "incorrect"
+            } else {
+                stringState[i] = "notset"
+            }
+        }
+        print(stringState)
     }
- /*
+    
+    func transformState() -> [State] {
+        var result = Array<State>(repeating: .notset, count: 81)
+        for i in 0...80 {
+            if stringState[i] == "correct" {
+                result[i] = .correct
+            } else if stringState[i] == "incorrect" {
+                result[i] = .incorrect
+            } else {
+                result[i] = .notset
+            }
+        }
+        return result
+    }
+ 
     init(values: [Int], correct: [String], canModify: [Bool]) {
         self.values = values
         self.canModify = canModify
-  /*      for i in 0...80 {
-        if correct[i] == "correct" {
-            self.correct[i] = .correct
+        self.stringState = correct
+        self.correct = Array(repeating: .notset, count: 81)
+        super.init()
+        print(stringState)
+        for i in 0...80 {
+            if stringState[i] == "correct" {
+                self.correct[i] = .correct
+            } else if stringState[i] == "incorrect" {
+                self.correct[i] = .incorrect
+            } else {
+                self.correct[i] = .notset
             }
         }
- */
+        print(self.correct)
     }
-    
     
     func encode(with coder: NSCoder) {
         coder.encode(values, forKey: "values")
-        
         for i in 0...80 {
-        if correct[i] == "correct" {
-            self.correct[i] = .correct
+            if correct[i] == .correct {
+                stringState[i] = "correct"
+            } else if correct[i] == .incorrect {
+                stringState[i] = "incorrect"
+            } else {
+                stringState[i] = "notset"
             }
         }
-        coder.encode(correct, forKey: "correct")
+        coder.encode(stringState, forKey: "correct")
+        print(stringState)
         coder.encode(canModify, forKey: "canModify")
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
         let values = aDecoder.decodeObject(forKey: "values") as! [Int]
-        let correct = aDecoder.decodeObject(forKey: "correct") as! [State]
+        let correct = aDecoder.decodeObject(forKey: "correct") as! [String]
         let canModify = aDecoder.decodeObject(forKey: "canModify") as! [Bool]
         self.init(values: values, correct: correct, canModify: canModify)
     }
-    */
+    
     convenience init(_ level: Level) {
         let boardGenerator = BoardGenerator()
         let board = boardGenerator.generateBoard(_level: (level))
@@ -96,8 +134,21 @@ class Board/*: NSObject, NSCoding */{
         values = Array(repeating: 0, count: 81)
         correct = Array(repeating: .notset, count: 81)
         canModify = Array(repeating: true, count: 81)
-       //super.init()
+        stringState = Array(repeating: "", count: 81)
+        super.init()
         self.parseBoard(board: board)
+    }
+    
+    func transformStringState() {
+        for i in 0...80 {
+            if correct[i] == .correct {
+                stringState[i] = "correct"
+            } else if correct[i] == .incorrect {
+                stringState[i] = "incorrect"
+            } else {
+                stringState[i] = "notset"
+            }
+        }
     }
     
     func getValue(pos: Int) -> Int {
@@ -576,41 +627,7 @@ class Board/*: NSObject, NSCoding */{
         
         return possibleValues
     }
-    
-    //the function that builds the solving algorithm
-    func solvingAlgorithm(values: [Int]) -> [Int]? {
-        //check if we have a full array of values and it is a correct one
-        if isSolution(values: values) {
-            return values
-        }
-        else {
-            var tempValues = values
-            var pos = -1
-            for i in 0...80 {
-                if values[i] == 0 {
-                    pos = i
-                
-                //start inserting possible values until we meet a good solution
-                        for val in possibleValues(values: values, pos: pos) {
-                            tempValues[pos] = val
-                            let k = solvingAlgorithm(values: tempValues)
-                            if k != nil {
-                                //we have a full array of values that works for a solution
-                                return k
-                            }
-                            //the array of values we made it's not a solution so we'll change the value from the possible values array
-                            continue
-                            }
-                }
-            }
-            return nil
-        }
-    }
-    
-    //the function that calls the whole solving algorithm
-    func autoSolve() -> [Int]? {
-        return solvingAlgorithm(values: self.values)
-    }
+   
 }
     
 
